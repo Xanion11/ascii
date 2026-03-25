@@ -12,6 +12,25 @@ union Line {
     std::bitset<128> field;
 };
 
+void ParsingBrightness(unsigned char *input, std::vector<int> *vector, int imagex, int imagey) {
+    for (int j = 0; j < imagey; j++) {
+
+        for (int i=0 + j*imagex; i < (j+1)*imagex; i++){
+            int brightness = (int)((int)(((float)input[i]/255)*100)/2.5);
+            #ifdef LOGGING
+            std::cout << brightness << ' ';
+            #endif
+            vector->push_back(brightness);
+        }
+        #ifdef LOGGING
+        std::cout << '\n' <<  "----------" << '\n';
+        #endif
+        vector->push_back(-1);
+    }
+
+}
+
+
 int main() {
     int x, y, n = 0;
     std::vector<float> image_vector;
@@ -22,20 +41,8 @@ int main() {
     }
     std::vector<int> character_strip;
 
-    for (int j = 0; j < y; j++) {
+    ParsingBrightness(data, &character_strip, x, y);
 
-        for (int i=0 + j*x; i < (j+1)*x; i++){
-            int brightness = (int)((int)(((float)data[i]/255)*100)/2.5);
-            #ifdef LOGGING
-            std::cout << brightness << ' ';
-            #endif
-            character_strip.push_back(brightness);
-        }
-        #ifdef LOGGING
-        std::cout << '\n' <<  "----------" << '\n';
-        #endif
-        character_strip.push_back(-1);
-    }
 
     return 0;
 }
