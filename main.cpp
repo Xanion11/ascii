@@ -11,13 +11,12 @@
 #include <vector>
 #include "font.h"
 #include <bitset>
-
 union Line {
     uint16_t asd[8];
     std::bitset<128> field;
 };
 
-void ParsingBrightness(unsigned char *input, std::vector<int> *vector, int imagex, int imagey) {
+void ParsingBrightness(unsigned char *input, std::vector<uint16_t> *vector, int imagex, int imagey) {
     for (int j = 0; j < imagey; j++) {
 
         for (int i=0 + j*imagex; i < (j+1)*imagex; i++){
@@ -30,27 +29,32 @@ void ParsingBrightness(unsigned char *input, std::vector<int> *vector, int image
         #ifdef LOGGING
         std::cout << '\n' <<  "----------" << '\n';
         #endif
-        vector->push_back(-1);
+        // vector->push_back(-1);
     }
 
 }
 
-void Write_File(std::vector<int> *vec, int width, int height, unsigned char *ret){
-    // repeat for x pixels y times
-    // for each pixel write 8x8 square from font.h depending on the value
-    // quadruple nested for loop (god help me)
-    //TODO make run fast
-    //
-    //
-    //
-    //
+void Write_File(std::vector<uint16_t> *vec, int width, int height, unsigned char *ret){
+    // quadruple nested for loops are no more (yay)
     // memset(ret, 0x00, width*height*8*8);
-    int i = 0;
-    while (i < width*height*8*8) {
-        ret[i] = 0xff;
+    // std::cout << vec->max_size() << ' ' << vec->size() << '\n';
+    // std::cout << font[20][4] << '\n';
+    int mask = 1;
+    for (int j =0;j<8*height;j+=8) {
+        for (int i =0;i<8*width;i+=8) {
+            // ret[8*j*width+i] = 0xff; // vec->at((j*width+i)%vec->size());
+            for (int y = 0; y <8; y++) {
+                uint16_t curr_char = font[vec->at(j*width/8 + i/8)][y];
+                for (int x = 0; x <8; x++) {
+                    if ((curr_char & mask) == 1) {
+                        ret[8*j*width+i +y*width*8+ x] = 0xff;
+                    }
+                    curr_char = curr_char >> 1;
+                }
+
+            }
+        }
     }
-
-
 }
 
 
@@ -61,7 +65,7 @@ int main() {
     if (data == nullptr) {
         return 1;
     }
-    std::vector<int> character_strip;
+    std::vector<uint16_t> character_strip;
 
     ParsingBrightness(data, &character_strip, x, y);
     stbi_image_free(data);
@@ -71,8 +75,8 @@ int main() {
     unsigned char *image_data = new unsigned char[arrsize];
 
     Write_File(&character_strip, x, y, image_data);
-
-    stbi_write_jpg("output.jpg", 8*x, 8*y, 1, image_data, 100);
+    stbi_write_png_compression_level =8;
+    stbi_write_png("output.png", 8*x, 8*y, 1, image_data, x*8);
 
     delete[] image_data;
 
