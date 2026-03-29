@@ -58,10 +58,18 @@ void Write_File(std::vector<uint16_t> *vec, int width, int height, unsigned char
 }
 
 
-int main() {
+int main(int argc, const char *argv[]) {
     int x, y, n = 0;
 
-    unsigned char *data = stbi_load("test.png",&x,&y,&n,1);
+    #ifdef LOGGING
+    std::cout << argc << std::endl;
+    for (int i = 0; i < argc; i++) {
+        std::cout << argv[i] << std::endl;
+    }
+    #endif
+    // char out_name[] = "output.png";
+
+    unsigned char *data = stbi_load(argv[1],&x,&y,&n,1);
     if (data == nullptr) {
         return 1;
     }
